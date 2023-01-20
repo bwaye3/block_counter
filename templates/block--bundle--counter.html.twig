@@ -1,0 +1,93 @@
+{#
+/**
+ * @file
+ * Theme override to display a block.
+ *
+ * Available variables:
+ * - plugin_id: The ID of the block implementation.
+ * - label: The configured label of the block if visible.
+ * - configuration: A list of the block's configuration values.
+ *   - label: The configured label for the block.
+ *   - label_display: The display settings for the label.
+ *   - provider: The module or other provider that provided this block plugin.
+ *   - Block plugin specific settings will also be stored here.
+ * - content: The content of this block.
+ * - attributes: array of HTML attributes populated by modules, intended to
+ *   be added to the main container tag of this template.
+ *   - id: A valid HTML ID and guaranteed unique.
+ * - title_attributes: Same as attributes, except applied to the main title
+ *   tag that appears in the template.
+ * - title_prefix: Additional output populated by modules, intended to be
+ *   displayed in front of the main title tag that appears in the template.
+ * - title_suffix: Additional output populated by modules, intended to be
+ *   displayed after the main title tag that appears in the template.
+ *
+ * @see template_preprocess_block()
+ */
+#}
+
+{# Preprocess #}
+{% set animations = (content.field_animations.0) %}
+{% set animation_delay = (content.field_animation_delay.0) %}
+{% set custom_color = (content.field_custom_color.0) %}
+{% set custom_text_color = (content.field_custom_text_color.0) %}
+{% set icon = (content.field_icon.0) %}
+{% set number = (content.field_number.0) %}
+{% set title = (content.field_title.0) %}
+{% set style = content.field_style[0]['#taxonomy_term'].getName()|clean_class|replace({' ': '-'}) %}
+{% set icon_size = (content.field_icon_size.0) %}
+{% set shape = (content.field_shape.0) %}
+
+{# Set CSS Container Classes #}
+{% set container_classes = [
+    'my-3',
+    'mb-4',
+    'block',
+    'block-' ~ configuration.provider|clean_class,
+    'block-' ~ plugin_id|clean_class,
+    'clearfix'
+] %}
+
+{# Set background color #}
+{% if custom_color is not empty %}
+    {% set background  = '#' ~ custom_color|render  ~ ';' %}
+{% elseif custom_color is empty %}
+    {% set style  = style|render %}
+{% endif %}
+
+{# Set text color #}
+{% if custom_text_color is not empty %}
+    {% set text_color  = '#' ~ custom_text_color|render  ~ ';' %}
+{% endif %}
+
+{# Content #}
+<div{{ attributes.addClass(classes|join(' ')) }}>
+    {{ title_prefix }}
+    {% if label %}
+        <h2 class="text-align-center {{ background }}">{{ title_attributes }}{{ label }}</h2>
+    {% endif %}
+    {{ title_suffix }}
+    {% block content %}
+        <div class="animate__animated animate__{{ animations }} {{ padding }} wow"
+             data-wow-delay="{{ animation_delay }}"
+             style="visibility: visible; -webkit-animation-delay: {{ animation_delay }}; -moz-animation-delay: {{ animation_delay }}; animation-delay: {{ animation_delay }};">
+            {% if shape['#markup'] == "diamond" %}
+                <div class="counter {{ shape }} {{ style }}" style="background-color: {{ background }}">
+                    <div class="counter-rotate">
+                        <i class="fa {{ icon }} {{ icon_size }} justify-content-center" style="color: {{ text_color }}"></i>
+                        <p class="timer count-number" style="color: {{ text_color }}">{{ number }}</p>
+                        <p class="count-text" style="color: {{ text_color }}">{{ title }}</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="counter {{ shape }} {{ style }}" style="background-color: {{ background }}">
+                    <i class="fa {{ icon }} {{ icon_size }} justify-content-center" style="color: {{ text_color }}"></i>
+                    <p class="timer count-number" style="color: {{ text_color }}">{{ number }}</p>
+                    <p class="count-text" style="color: {{ text_color }}">{{ title }}</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endblock %}
+</div>
+
+
